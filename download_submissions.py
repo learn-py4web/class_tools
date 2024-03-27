@@ -3,11 +3,8 @@
 
 import argparse
 import csv
-from collections import defaultdict
-import datetime
 import os
 import pickle
-import random
 import zipfile
 
 from googleapiclient.discovery import build
@@ -110,7 +107,7 @@ if __name__ == '__main__':
                         )
     parser.add_argument('-z', '--no_unzip', action='store_true', default=False,
                         help='Do not unzip the downloaded files.')
-    parser.add_argument('-c', '--destination_dir', type=str,
+    parser.add_argument('-d', '--destination_dir', type=str,
                         default='.', help='Directory where to store the submissions.')
     parser.add_argument('-t', '--test', action='store_true', default=False,
                         help="Test but do not download anything")
