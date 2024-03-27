@@ -81,6 +81,7 @@ def main(args):
                 with zipfile.ZipFile(download_fn, 'r') as zip_ref:
                     extraction_dir = os.path.join(args.destination_dir, email)
                     zip_ref.extractall(extraction_dir)
+                os.remove(download_fn)
     # Finally, writes the csv file with all the students who have submitted,
     # so their work can be included.
     csv_fn = os.path.join(args.destination_dir, 'students.csv')
