@@ -5,6 +5,7 @@ import argparse
 import csv
 import os
 import pickle
+import shutil
 import zipfile
 
 from googleapiclient.discovery import build
@@ -60,15 +61,22 @@ def main(args):
 
     # Now downloads all the submissions.
     student_submissions = {row[0]: row[-1] for row in values}
+    bad_files = []
     for email, url in student_submissions.items():
         if args.test:
             print(email, url)
             continue
         docid = url.split("=")[-1]
+        student_dir = os.path.join(args.destination_dir, email)
         download_fn = os.path.join(args.destination_dir, email + '.' + args.extension)
         # Creates the directory if necessary.
         if not os.path.exists(args.destination_dir):
             os.makedirs(args.destination_dir)
+        # Removes previous files.
+        if os.path.exists(download_fn):
+            os.unlink(download_fn)
+        if os.path.exists(student_dir):
+            shutil.rmtree(student_dir)
         with open(download_fn, 'wb') as f:
             request = drive_service.files().get_media(fileId=docid)
             downloader = MediaIoBaseDownload(f, request)
@@ -77,11 +85,16 @@ def main(args):
                 status, done = downloader.next_chunk()
                 print("Download %s to %s : %d%%." % (email, download_fn, int(status.progress() * 100)))
         if not args.no_unzip: 
-            if args.extension == 'zip':
-                with zipfile.ZipFile(download_fn, 'r') as zip_ref:
-                    extraction_dir = os.path.join(args.destination_dir, email)
-                    zip_ref.extractall(extraction_dir)
-                os.remove(download_fn)
+            try:
+                if args.extension == 'zip':
+                    with zipfile.ZipFile(download_fn, 'r') as zip_ref:
+                        extraction_dir = os.path.join(args.destination_dir, email)
+                        zip_ref.extractall(extraction_dir)
+                    os.remove(download_fn)
+            except Exception as e:
+                bad_files.append(email)
+                print(f"Error unzipping {download_fn}: {e}")
+                os.unlink(download_fn)
     # Finally, writes the csv file with all the students who have submitted,
     # so their work can be included.
     csv_fn = os.path.join(args.destination_dir, 'students.csv')
@@ -91,6 +104,8 @@ def main(args):
         writer.writeheader()
         for email in student_submissions.keys():
             writer.writerow({'email': email})
+    if bad_files:
+        print(f"Errors in unzipping files for {", ".join(bad_files)}")
 
 
 if __name__ == '__main__':
