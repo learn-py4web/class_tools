@@ -12,7 +12,7 @@ def main(args):
     csv_fn = os.path.join(args.assignment_dir, 'grades.csv')
     with open(csv_fn, 'w', newline='') as csvfile:
         fieldnames=['student', 'grade']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter='\t')
         writer.writeheader()
         with os.scandir(args.assignment_dir) as it:
             for entry in it:

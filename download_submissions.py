@@ -105,7 +105,7 @@ def main(args):
         for email in student_submissions.keys():
             writer.writerow({'email': email})
     if bad_files:
-        print(f"Errors in unzipping files for {", ".join(bad_files)}")
+        print(f"Errors in unzipping files for {bad_files}")
 
 
 if __name__ == '__main__':
