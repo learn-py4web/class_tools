@@ -10,8 +10,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload
 
-from file_distributor import FileDistributor
-
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets',
           'https://www.googleapis.com/auth/drive']
@@ -35,7 +33,7 @@ class FileDistributor(object):
         """
         assert mode in ['reader', 'writer', 'commenter']
         # Uploads the file.
-        file_meta = {'name': file_name, 'parents': self.share_folder_id}
+        file_meta = {'name': file_name, 'parents': [self.share_folder_id]}
         # do_create keeps track of whether we need to create the file.
         do_create = not update
         if update:

@@ -2,13 +2,9 @@
 # BSD License
 
 import argparse
-import csv
 import os
 import pickle
-import shutil
-import time
-import yatl
-import zipfile
+# import yatl
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -69,8 +65,8 @@ def main(args):
     # Computes reverse index of header to column.
     header2column = {header: i for i, header in enumerate(headers)}
     # Figures out which column is the email. 
-    if args.email is not None:
-        email_column = header2column[args.email]
+    if args.email_column is not None:
+        email_column = header2column[args.email_column]
     else:
         possible_email_columns = [header2column[h] for h in headers if 'email' in h.lower()]
         if len(possible_email_columns) == 1:
@@ -81,21 +77,23 @@ def main(args):
         
     # Produces the text. 
     for row in values[1:]:
-        email = values[email_column]
+        email = row[email_column]
+        if email is None or '@' not in email:
+            continue
         # We only process the required students. 
         if args.students is not None and email not in args.students:
             continue
-        d = {headers[i]: row[i] for i in range(len(row))}
+        d = {headers[i].strip().replace(' ', '_') : row[i] for i in range(len(row))}
         with open(args.feedback, 'r') as f:
-            text = yatl.render(f.read(), d)
+            text = f.read().format(**d)
         if args.test:
             print("Feedback for", email, ":")
             print(text)
             break
         # Shares the text. 
         filename = f'feedback_{email}.html'
-        # file_distributor.distribute_bytes(
-        #     email, text.encode('utf-8'), filename, mime='text/plain', mode='reader', update=True)
+        file_distributor.distribute_bytes(
+            email, text.encode('utf-8'), filename, mime='text/plain', mode='reader', update=True)
         print("Distributed feedback to", email)
     print("Done.")
 
@@ -104,10 +102,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-s', '--spreadsheet_id', default=None,
                         help="ID of the spreadsheet to use as base of download.")
-    parser.add_argument('--sheet', type=str, default='Form Responses 1',
+    parser.add_argument('--sheet', type=str, default='Feedback',
                         help='Sheet name')
     parser.add_argument('-f', '--feedback', type=str, default=None,
-                        help="Feedback yatl template")
+                        help="Feedback template. Use \{column_name\} to refer to a column called 'column name'")
     parser.add_argument('-m', '--email_column', default=None,
                         help='Column containing email, if title is not email')
     parser.add_argument('-d', '--destination_dir', type=str, default=None, 
