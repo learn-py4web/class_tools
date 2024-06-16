@@ -6,6 +6,7 @@ import csv
 import os
 import pickle
 import shutil
+import time
 import zipfile
 
 from googleapiclient.discovery import build
@@ -62,6 +63,9 @@ def main(args):
     # Now downloads all the submissions.
     student_submissions = {row[0]: row[-1] for row in values}
     bad_files = []
+    if args.students is not None:
+        students = args.students.split(',')
+        student_submissions = {k: v for k, v in student_submissions.items() if k in students}
     for email, url in student_submissions.items():
         if args.test:
             print(email, url)
@@ -77,13 +81,14 @@ def main(args):
             os.unlink(download_fn)
         if os.path.exists(student_dir):
             shutil.rmtree(student_dir)
+        time0 = time.time()
         with open(download_fn, 'wb') as f:
             request = drive_service.files().get_media(fileId=docid)
             downloader = MediaIoBaseDownload(f, request)
             done = False
             while done is False:
                 status, done = downloader.next_chunk()
-                print("Download %s to %s : %d%%." % (email, download_fn, int(status.progress() * 100)))
+                print("Download %s to %s : %d%% %.1fs" % (email, download_fn, int(status.progress() * 100), time.time() - time0))
         if not args.no_unzip: 
             try:
                 if args.extension == 'zip':
@@ -127,5 +132,8 @@ if __name__ == '__main__':
                         default='.', help='Directory where to store the submissions.')
     parser.add_argument('-t', '--test', action='store_true', default=False,
                         help="Test but do not download anything")
+    parser.add_argument('--students', type=str, default=None,
+                        help='Comma-separated list of student emails whose work we want to download. '
+                        'If not specified, all students are downloaded.')
     args = parser.parse_args()
     main(args)
