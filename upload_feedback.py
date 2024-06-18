@@ -83,7 +83,8 @@ def main(args):
         # We only process the required students. 
         if args.students is not None and email not in args.students:
             continue
-        d = {headers[i].strip().replace(' ', '_') : row[i] for i in range(len(row))}
+        d = {h: "" for h in headers}
+        d.update({headers[i].strip().replace(' ', '_') : row[i] for i in range(len(row))})
         with open(args.feedback, 'r') as f:
             text = f.read().format(**d)
         if args.test:
@@ -91,10 +92,9 @@ def main(args):
             print(text)
             break
         # Shares the text. 
-        filename = f'feedback_{email}.html'
+        filename = f'feedback_{email}.txt'
         file_distributor.distribute_bytes(
             email, text.encode('utf-8'), filename, mime='text/plain', mode='reader', update=True)
-        print("Distributed feedback to", email)
     print("Done.")
 
 
