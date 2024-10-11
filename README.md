@@ -1,4 +1,36 @@
-# Grading for py4web de Alfaro Assignments
+## Setup
+
+To use these scripts, you need to create credentials for Google Drive.
+Here is how to proceed: 
+
+To create a Google credentials JSON file for accessing Google Drive, navigate to the Google Cloud Console, go to "APIs & Services" > "Credentials", then create a new "Service Account" and select "JSON" as the key type to download a JSON file containing your access credentials; this file is typically named "credentials.json" and should be stored securely as it contains your private key information. [1, 2, 3, 4, 5]
+
+Key steps: [1, 2, 3]
+* Access Google Cloud Console: Open the Google Cloud Platform console and select your project. [1, 2, 3]
+* Go to Credentials page: Navigate to "APIs & Services" > "Credentials". [1, 2, 3]
+* Create a Service Account: Click "Create Credentials" and select "Service account". [1, 2, 3]
+* Name your Service Account: Provide a name for your service account. [1, 2, 4]
+* Add a Key: Select "Add Key" > "Create new key". [1, 2, 3]
+* Choose JSON format: Set the "Key type" to "JSON" and click "Create". [1, 2, 3]
+* Download the JSON file: A JSON file containing your credentials will be downloaded to your computer.  Name it `credentials.json` . [1, 2, 3]
+
+References:
+* [1] https://developers.google.com/workspace/guides/create-credentials
+* [2] https://support.google.com/a/answer/7378726?hl=en
+* [3] https://support.google.com/cloud/answer/6158849?hl=en
+* [4] https://cloud.google.com/docs/authentication/provide-credentials-adc
+* [5] https://cloud.google.com/iam/docs/keys-create-delete
+
+
+## Checking Google Drive sizes: 
+
+```python
+python ls.py -d <max_depth> <folder_id>
+```
+
+
+
+## Grading for py4web de Alfaro Assignments
 
 Every assignment has a source version, which is private to instructors and used to develop the grading, and a student version, which is shared with students. 
 
