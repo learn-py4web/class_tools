@@ -35,6 +35,7 @@ import argparse
 import io
 import os
 import pickle
+import re
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -66,7 +67,7 @@ def list_dir(dir_id, path, depth, args):
     size of the files in there."""
     depth += 1
     # Creates a query. 
-    q = f"'{dir_id}' in parents"
+    q = f"'{dir_id}' in parents" if dir_id != "root" else "'root' in parents"
     page_token = None
     total_size = 0
     while True:
@@ -77,11 +78,11 @@ def list_dir(dir_id, path, depth, args):
             pageToken=page_token).execute()
         for file in response.get('files', []):
             if file.get('mimeType') == 'application/vnd.google-apps.folder':
-                if depth is not None and depth >= args.depth:
+                if depth is not None and depth > args.depth:
                     continue
                 t = list_dir(file.get('id'), path + file.get('name', '') + "/", depth, args)
                 total_size += t
-                if args.all and t > 0:
+                if t > 0 and (args.all or depth <= 1):
                     print(f"{hsize(t)} \t{path}{sanitize(file.get('name'))}")
             else:
                 total_size += int(file.get('size', 0))
@@ -92,8 +93,10 @@ def list_dir(dir_id, path, depth, args):
 
 
 def main(args):
-    list_dir(args.dir_id, "", 0, args)
-    
+    t = list_dir(args.dir_id, "", 0, args)
+    filename = drive_service.files().get(fileId=args.dir_id).execute().get('name')
+    print(f"Total size of {filename}: {hsize(t)}")
+
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -101,10 +104,8 @@ if __name__ == '__main__':
                         help="Depth limit for recursion.")
     parser.add_argument('-a', '--all', action='store_true',
                         help="List all directory sizes.")
-    parser.add_argument('dir_id', default=None,)
+    parser.add_argument('dir_id', default="root",)
     args = parser.parse_args()
-    if args.dir_id is None: 
-        raise ValueError("Please provide a directory id.")
     # Auth code. 
     if os.path.exists('token.pickle'):
         with open('token.pickle', 'rb') as token:

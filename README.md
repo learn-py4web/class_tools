@@ -39,22 +39,27 @@ Every assignment has a source version, which is private to instructors and used 
 There are two steps in grading an assignment: downloading it, and grading it. 
 
 The package accesses Google Drive; you need to have this credentials.json file. Please do not share it. If it leaks, it does not grant anyone access to anybody else’s Drive, but it still uses resources from a cloud project that is not for public use. 
-Downloading an assignment
- python download_submissions.py -s <sheets_id> -d <submission_folder>
+
+### Downloading an assignment
+
+```
+python download_submissions.py -s <sheets_id> -d <submission_folder>
+```
 
 where: 
 
-sheets_id is the ID of the google sheets corresponding to the submissions form.  If the URL of the sheet is: 
+`sheets_id` is the ID of the google sheets corresponding to the submissions form.  If the URL of the sheet is: 
 
 `https://docs.google.com/spreadsheets/d/something/edit`
 
 then the ID is the `something` portion. 
 
-submission_folder is the directory where you want the result to be stored.  There will be one folder per student, named student@ucsc.edu (with student replaced by the student actual email id), with in it already unzipped, the student submission. 
+`submission_folder` is the directory where you want the result to be stored.  There will be one folder per student, named student@ucsc.edu (with student replaced by the student actual email id), with in it already unzipped, the student submission. 
 
 The download code has many options; feel free to explore them. 
 
-Grading an assignment
+### Grading an assignment
+
 To grade an assignment, do: 
 
 ```
